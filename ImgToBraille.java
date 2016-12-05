@@ -61,10 +61,6 @@ public class ImgToBraille {
 
 		// 出力イメージのサイズ計算をおこなう。
 		// もとのイメージに、オフセット、パディング分、マージン分を加算
-		
-		System.out.println("width: "+ width
-			+ "blockNum_w: " + blockNum_w);
-		
 		width_out = width
 			+ OFFSET_W * 2
 			+ PADDING_W * blockNum_w
@@ -101,54 +97,100 @@ public class ImgToBraille {
 			x_out = 0; y_out++;		// 改行
 		}
 		
-		// 点字部 (部品)
-		// 1. 点のある行
-		// 1.1. 左オフセット
-		x_tmp = x_out;
- 		while( x_out < x_tmp + OFFSET_W ){
-			write.setRGB(x_out, y_out, 0xffffff);
- 			x_out++;
-		}
+		int cnt1;
+		int cnt2;
 		
-		int blockCnt = 0;	// 何ブロック描画したかのカウンタ
+		cnt2 = 1;
 		
-		while( true ) {
-			// 1.2. 点描画
-			write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
-			for( int i = 0; i < PADDING_W; i++ ) {
-				write.setRGB(x_out, y_out, 0xffffff);
-				x_out++;
-			}
-			write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
+		// 点字部
+		for( int i = 0; i < blockNum_h; i++ ){
+		
+			cnt1 = 1;
+			// 点字1行分。1列の点々の描画を3回繰り返す
+			while ( true ) {
 			
-			blockCnt++;
-			if( blockCnt >= blockNum_w ) break;	// マージンは点の部分より一回少なく描画する
-			
-			// 1.3. マージン描画
-			for( int i = 0; i < MARGIN_W; i++ ) {
-				write.setRGB(x_out, y_out, 0xffffff);
-				x_out++;
+				// 1. 点のある行
+				// 1.1. 左オフセット
+				x_tmp = x_out;
+				while( x_out < x_tmp + OFFSET_W ){
+					write.setRGB(x_out, y_out, 0xffffff);
+					x_out++;
+				}
+				
+				int blockCnt = 0;	// 何ブロック描画したかのカウンタ
+				
+				while( true ) {
+					// 1.2. 点描画
+					write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
+					for( int j = 0; j < PADDING_W; j++ ) {
+						write.setRGB(x_out, y_out, 0xffffff);
+						x_out++;
+					}
+					write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
+					
+					blockCnt++;
+					if( blockCnt >= blockNum_w ) break;	// マージンは点の部分より一回少なく描画する
+					
+					// 1.3. マージン描画
+					for( int j = 0; j < MARGIN_W; j++ ) {
+						write.setRGB(x_out, y_out, 0xffffff);
+						x_out++;
+					}
+				}
+				
+				// 1.4. 右オフセット
+				x_tmp = x_out;
+				while( x_out < x_tmp + OFFSET_W ){
+					write.setRGB(x_out, y_out, 0xffffff);
+					x_out++;
+				}
+				
+				// 1.5. 改行
+				x_out = 0; y_out++;
+				
+				// 3周目はパディングは不要
+				if ( cnt1 == 3 ) break;
+				
+				// 2. パディング部
+				int haba = y_out + PADDING_H;
+				while( y_out < haba ){
+					while( x_out < width_out ){
+						write.setRGB(x_out, y_out, 0xffffff);
+						x_out++;	// 1コマ進める
+					}
+					x_out = 0; y_out++;		// 改行
+				}
+				
+				// カウントアップ
+				cnt1++;
 			}
+			
+			// 最後のブロックはマージン不要
+			if (cnt2 == blockNum_h) break;
+			
+			// 2. マージン部 (部品)
+			int haba2 = y_out + MARGIN_H;
+			while( y_out < haba2 ){
+				while( x_out < width_out ){
+					write.setRGB(x_out, y_out, 0xffffff);
+					x_out++;	// 1コマ進める
+				}
+				x_out = 0; y_out++;		// 改行
+			}
+			
+			// カウントアップ
+			cnt2++;
 		}
 		
-		// 1.4. 右オフセット
-		x_tmp = x_out;
- 		while( x_out < x_tmp + OFFSET_W ){
-			write.setRGB(x_out, y_out, 0xffffff);
- 			x_out++;
-		}
-		
-		// マージン部 (部品)
-		/*
-		while( y_out < y_out + MARGIN_H ){
+		// 下オフセット部
+		int target = y_out + OFFSET_H;
+		while( y_out < target ){
 			while( x_out < width_out ){
-				write.setRGB(x_out, y_out, 0xff0000);
+				write.setRGB(x_out, y_out, 0xffffff);
 				x_out++;	// 1コマ進める
 			}
 			x_out = 0; y_out++;		// 改行
 		}
-		*/
-		
 		
 		
 //				System.out.println("x_out: " + x_out + " y_out: " + y_out);
