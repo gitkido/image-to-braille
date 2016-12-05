@@ -82,6 +82,9 @@ public class ImgToBraille {
 		 *  マッピングの考え方は、出力イメージのサイズ計算に同じ
 		 */
 		
+		int x_in = 0;	// 入力イメージx座標
+		int y_in = 0;	// 入力イメージy座標
+		
 		int x_out = 0;	// 出力イメージx座標
 		int y_out = 0;	// 出力イメージy座標
 		
@@ -101,6 +104,7 @@ public class ImgToBraille {
 		int cnt2;
 		
 		cnt2 = 1;
+		int pixel;
 		
 		// 点字部
 		for( int i = 0; i < blockNum_h; i++ ){
@@ -121,12 +125,21 @@ public class ImgToBraille {
 				
 				while( true ) {
 					// 1.2. 点描画
-					write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
+					// 1.2.1. 第1点
+					pixel = read.getRGB(x_in, y_in);
+					write.setRGB(x_out, y_out, pixel);
+					x_in++;
+					x_out++;
+					// 1.2.2. 横パディング
 					for( int j = 0; j < PADDING_W; j++ ) {
 						write.setRGB(x_out, y_out, 0xffffff);
 						x_out++;
 					}
-					write.setRGB(x_out, y_out, 0xff0000); x_out++;		// とりあえず赤ポチで
+					// 1.2.3. 第2点
+					pixel = read.getRGB(x_in, y_in);
+					write.setRGB(x_out, y_out, pixel);
+					x_in++;
+					x_out++;
 					
 					blockCnt++;
 					if( blockCnt >= blockNum_w ) break;	// マージンは点の部分より一回少なく描画する
@@ -146,6 +159,7 @@ public class ImgToBraille {
 				}
 				
 				// 1.5. 改行
+				x_in = 0; y_in++;
 				x_out = 0; y_out++;
 				
 				// 3周目はパディングは不要
